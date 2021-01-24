@@ -13,9 +13,14 @@ Register::
     $ curl -H "Content-Type: application/json" localhost:8000/api/register -d "{\"email\":\"toto@domain.fr\",\"password\":\"aaaaaaaaaaaa\"}"
 
 Check the mail in docker-compose output ::
-    "body": "{\"to\": \"toto@domain.fr\", \"from\": \"noreply@registration-demo.io\", \"body\": \"Hello, here is your activation code OLjC. Please go to /api/activate\"}",
+    
+    "json": {
+        "to": "toto@domain.fr",
+        "from": "noreply@registration-demo.io",
+        "body": "Hello, here is your activation code OLjC. Please go to /api/activate"
+    }
 
-Activate your account, given 1234 is your activation code ::
+Activate your account ::
 
     $ curl -H "Content-Type: application/json" -u "toto@domain.fr":aaaaaaaaaaaa localhost:8000/api/activate -d "{\"activation_code\":\"OLjC\"}"
 
@@ -39,8 +44,8 @@ Run DEV
 
 ::
 
-    $ docker-compose up database
-    $ export FLASK_APP=main FLASK_ENV=development PGHOST=localhost PGUSER=demo PGPASSWORD=demo PGDATABASE=registration PGPORT=5432
+    $ docker-compose up database mail
+    $ export FLASK_APP=main FLASK_ENV=development PGHOST=localhost PGUSER=demo PGPASSWORD=demo PGDATABASE=registration PGPORT=5432 MAIL_URL=http://localhost:8025
     $ flask run
 
 
