@@ -27,7 +27,7 @@ Activate your account ::
 
 Architecture
 ------------
-
+   ![architecture.png](/architecture.png)
 
 Install DEV
 -----------
