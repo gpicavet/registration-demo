@@ -4,9 +4,6 @@ from main.database import DatabaseConnection
 
 class UserRepository():
 
-    def __init__(self):
-        pass
-
     def account_get(self, email):
         cursor = DatabaseConnection.get().cursor()
         cursor.execute(

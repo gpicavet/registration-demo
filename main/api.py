@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
-from string import ascii_letters, digits
+from string import digits
 from random import choice
 from email.utils import parseaddr
 from flask import request, Blueprint
 from flask_bcrypt import Bcrypt
 from flask_api import status
+from dependency_injector.wiring import inject, Provide
 from main.user_repository import UserRepository
 from main.mail_service import MailService
+from main.container import ApplicationContainer
 
 ACTIVATION_TIMEOUT = 60
 
@@ -16,7 +18,9 @@ bp = Blueprint("api", __name__, url_prefix="/api")
 
 
 @bp.route('/register', methods=['POST'])
-def register():
+@inject
+def register(user_repository: UserRepository = Provide[ApplicationContainer.user_repository],
+             mail_service: MailService = Provide[ApplicationContainer.mail_service]):
     """Register a user or renew the activation code if timed out
 
     Request : JSON payload :
@@ -30,7 +34,7 @@ def register():
     status 200 if account created or activation code renewed. An activation mail is sent
     status 200 if account exists, for security reasons (dont expose existing emails)
     """
-
+    print(user_repository)
     if not request.json:
         return "Invalid json", status.HTTP_400_BAD_REQUEST
 
@@ -41,8 +45,7 @@ def register():
     if not "password" in request.json or not (12 <= len(request.json.get("password")) <= 255):
         return "Invalid password : must be between 12 and 255 characters", status.HTTP_400_BAD_REQUEST
 
-    rep = UserRepository()
-    account = rep.account_get(request.json["email"])
+    account = user_repository.account_get(request.json["email"])
 
     if account and account["status"] != 'P':
         print("security : attempt to register again {0}".format(
@@ -50,27 +53,28 @@ def register():
     else:
 
         activation_key = ''.join(
-            [choice(ascii_letters + digits) for i in range(4)])
+            [choice(digits) for i in range(4)])
 
         if account:
             # only renew activation key. ignore new password for security
-            rep.account_set_activation_key(
+            user_repository.account_set_activation_key(
                 request.json["email"], activation_key)
         else:
             password_hash = bcrypt.generate_password_hash(
                 request.json["password"]).decode('utf8')
-            rep.account_add(request.json["email"],
+            user_repository.account_add(request.json["email"],
                             password_hash, 'P', activation_key)
 
         # TODO should retry or queue
-        MailService.send(
+        mail_service.send(
             request.json["email"], "Hello, here is your activation code {0}. Please go to /api/activate".format(activation_key))
 
     return 'Thanks, you will receive an email with the activation code', status.HTTP_200_OK
 
 
 @bp.route('/activate', methods=['POST'])
-def activate():
+@inject
+def activate(user_repository: UserRepository = Provide[ApplicationContainer.user_repository]):
     """Activate a pending account
 
         Request: BASIC AUTH providing email and password given during registration

@@ -12,17 +12,21 @@ Register::
 
     $ curl -H "Content-Type: application/json" localhost:8000/api/register -d "{\"email\":\"toto@domain.fr\",\"password\":\"aaaaaaaaaaaa\"}"
 
-Check the mail in docker-compose output ::
+Check the "mail" in docker-compose output ::
     
     "json": {
         "to": "toto@domain.fr",
         "from": "noreply@registration-demo.io",
-        "body": "Hello, here is your activation code OLjC. Please go to /api/activate"
+        "body": "Hello, here is your activation code 1234. Please go to /api/activate"
     }
 
 Activate your account ::
 
-    $ curl -H "Content-Type: application/json" -u "toto@domain.fr":aaaaaaaaaaaa localhost:8000/api/activate -d "{\"activation_code\":\"OLjC\"}"
+    $ curl -H "Content-Type: application/json" -u "toto@domain.fr":aaaaaaaaaaaa localhost:8000/api/activate -d "{\"activation_code\":\"1234\"}"
+
+
+Architecture
+------------
 
 
 Install DEV
