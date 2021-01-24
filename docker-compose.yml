@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  database:
+    image: postgres:13-alpine
+    restart: on-failure
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ${PWD}/db.sql:/docker-entrypoint-initdb.d/db.sql
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+       - app-network
+
+  mail:
+    image: mendhak/http-https-echo
+    restart: on-failure
+    ports:
+      - 8025:80
+    networks:
+      - app-network
+
+  registration-api:
+    build: .
+    restart: on-failure
+    depends_on:
+      - "database"
+    ports:
+      - 8000:8000
+    environment:
+      - PGHOST=database
+      - PGUSER=demo
+      - PGPASSWORD=demo
+      - PGDATABASE=registration
+      - MAIL_URL=http://mail:80
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+networks:
+  app-network:

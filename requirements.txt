@@ -1,0 +1,6 @@
+gunicorn==19.7.1
+requests==2.25.1
+flask==1.1
+flask-bcrypt==0.7.1
+flask-api==2.0
+psycopg2-binary==2.8.6
