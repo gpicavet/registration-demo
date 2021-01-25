@@ -116,11 +116,8 @@ def activate(user_repository: UserRepository = Provide[ApplicationContainer.user
     if request.json["activation_code"] != account["activation_key"]:
         return 'invalid activation code', status.HTTP_400_BAD_REQUEST
 
-    print(
-        (datetime.now() - account["registred_date"]),  account["registred_date"])
     if (datetime.now() - account["registred_date"]) > timedelta(seconds=ACTIVATION_TIMEOUT):
         return 'activation code timed out, please register again', status.HTTP_400_BAD_REQUEST
 
-    if account["status"] == 'P':
-        rep.account_activate(email)
-        return 'Your account has been successfully activated', status.HTTP_200_OK
+    rep.account_activate(email)
+    return 'Your account has been successfully activated', status.HTTP_200_OK
