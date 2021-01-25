@@ -30,8 +30,7 @@ Run Integration Tests with Docker
 
 this will override starting command to run pytest with coverage report ::
 
-    docker-compose -p tests run --rm registration-api pip install '.[test]' && coverage run -m pytest && coverage report
-
+    docker-compose -p tests run -v /var/run/docker.sock:/var/run/docker.sock --rm registration-api sh -c "pip install '.[test]' && coverage run -m pytest && coverage report"
 
 Architecture
 ------------
