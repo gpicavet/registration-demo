@@ -25,9 +25,18 @@ Activate your account ::
     $ curl -H "Content-Type: application/json" -u "toto@domain.fr":aaaaaaaaaaaa localhost:8000/api/activate -d "{\"activation_code\":\"1234\"}"
 
 
+Run Integration Tests with Docker
+---------------------------------
+
+this will override starting command to run pytest with coverage report ::
+
+    docker-compose -p tests run --rm registration-api pip install '.[test]' && coverage run -m pytest && coverage report
+
+
 Architecture
 ------------
    ![architecture.png](/architecture.png)
+
 
 Install DEV
 -----------
