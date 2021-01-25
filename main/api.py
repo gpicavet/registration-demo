@@ -104,8 +104,7 @@ def activate(user_repository: UserRepository = Provide[ApplicationContainer.user
     if not email or not password:
         return 'invalid email or password', status.HTTP_401_UNAUTHORIZED
 
-    rep = UserRepository()
-    account = rep.account_get(email)
+    account = user_repository.account_get(email)
 
     if not account or not bcrypt.check_password_hash(account["password"], password):
         return 'invalid email or password', status.HTTP_401_UNAUTHORIZED
@@ -119,5 +118,5 @@ def activate(user_repository: UserRepository = Provide[ApplicationContainer.user
     if (datetime.now() - account["registred_date"]) > timedelta(seconds=ACTIVATION_TIMEOUT):
         return 'activation code timed out, please register again', status.HTTP_400_BAD_REQUEST
 
-    rep.account_activate(email)
+    user_repository.account_activate(email)
     return 'Your account has been successfully activated', status.HTTP_200_OK
