@@ -2,6 +2,8 @@ import pytest
 import logging
 import re
 
+import sqlalchemy
+
 from datetime import datetime,timedelta
 
 from mock import patch, Mock
@@ -31,10 +33,16 @@ password = bcrypt.generate_password_hash("aaaaaaaaaaaa").decode('utf8')
 def app():
     postgres_container = PostgresContainer("postgres:13-alpine")
     code_dir = Path(__file__).parent
-    postgres_container.with_volume_mapping(
-        code_dir.parent.as_posix()+'/db.sql', '/docker-entrypoint-initdb.d/db.sql')
     with postgres_container as postgres:
-        dsn = "dbname=registration user=demo password=demo host=localhost port={0}".format(
+        e = sqlalchemy.create_engine(postgres.get_connection_url())
+        file=open(code_dir.parent.as_posix()+"/db.sql")
+        escaped_sql = sqlalchemy.text(file.read())
+        with e.connect().execution_options(autocommit=True) as conn:
+            conn.execute(escaped_sql)
+            conn.execute("DELETE FROM account")
+        e.dispose()
+
+        dsn = "dbname=test user=test password=test host=%s port=%s" % (postgres.get_container_host_ip(),
             postgres.get_exposed_port(port=5432))
         app = create_app(dsn)
         with app.app_context():

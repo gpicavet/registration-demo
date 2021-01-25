@@ -12,5 +12,6 @@ COPY main ./main
 COPY tests ./tests
 COPY setup.py .
 COPY setup.cfg .
+COPY db.sql .
 
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "main:create_app(dsn='')"]
